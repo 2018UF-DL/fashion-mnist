@@ -1,10 +1,20 @@
 import os
+from skimage import io
+from PIL import image
 import torchvision.datasets.mnist as mnist
 
 '''
-download the data set from torchvision
+download address:
+    urls = [
+        'http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-images-idx3-ubyte.gz',
+        'http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/train-labels-idx1-ubyte.gz',
+        'http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/t10k-images-idx3-ubyte.gz',
+        'http://fashion-mnist.s3-website.eu-central-1.amazonaws.com/t10k-labels-idx1-ubyte.gz',
+    ]
+decompress the data set by yourself
+import the data set using torchvision from your data set root
 '''
-root="C:.../fashion_mnist/"
+root = "C:/.../fashion_mnist/"
 train_set = (
     mnist.read_image_file(os.path.join(root, 'train-images-idx3-ubyte')),
     mnist.read_label_file(os.path.join(root, 'train-labels-idx1-ubyte'))
@@ -13,11 +23,12 @@ test_set = (
     mnist.read_image_file(os.path.join(root, 't10k-images-idx3-ubyte')),
     mnist.read_label_file(os.path.join(root, 't10k-labels-idx1-ubyte'))
         )
-print("training set :",train_set[0].size())
-print("test set :",test_set[0].size())
+print("training set :", train_set[0].size())
+print("test set :", test_set[0].size())
 
 '''
 divide the training set and testing set
+convert the binary file to jpg file
 save the pictures in data set in the same directory of root
 create label file train.txt and test.txt in the same directory of root
 '''
@@ -35,10 +46,10 @@ def convert_to_img(train=True):
     else:
         f = open(root + 'test.txt', 'w')
         data_path = root + '/test/'
-        if (not os.path.exists(data_path)):
+        if not os.path.exists(data_path):
             os.makedirs(data_path)
-        for i, (img,label) in enumerate(zip(test_set[0],test_set[1])):
-            img_path = data_path+ str(i) + '.jpg'
+        for i, (img, label) in enumerate(zip(test_set[0],test_set[1])):
+            img_path = data_path + str(i) + '.jpg'
             io.imsave(img_path, img.numpy())
             f.write(img_path + ' ' + str(label) + '\n')
         f.close()
@@ -56,7 +67,7 @@ class MyDataset(Dataset):
             line = line.strip('\n')
             line = line.rstrip()
             words = line.split()
-            imgs.append((words[0],int(words[1])))
+            imgs.append((words[0], int(words[1])))
         self.imgs = imgs
         self.transform = transform
         self.target_transform = target_transform
@@ -72,8 +83,8 @@ class MyDataset(Dataset):
     def __len__(self):
         return len(self.imgs)
 
-train_data=MyDataset(txt=root+'train.txt', transform=transforms.ToTensor())
-test_data=MyDataset(txt=root+'test.txt', transform=transforms.ToTensor())
+train_data = MyDataset(txt=root+'train.txt', transform=transforms.ToTensor())
+test_data = MyDataset(txt=root+'test.txt', transform=transforms.ToTensor())
 train_loader = DataLoader(dataset=train_data, batch_size=64, shuffle=True)
 test_loader = DataLoader(dataset=test_data, batch_size=64)
 
